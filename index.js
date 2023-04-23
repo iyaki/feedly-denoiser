@@ -2,6 +2,7 @@ import whiteList from './data/whiteList.json' assert {type: 'json'}
 import blackList from './data/blackList.json' assert {type: 'json'}
 
 const baseUrl = 'https://cloud.feedly.com'
+const wordSeparatorRegex = /[\s.,;:!?\-]+/g
 
 const streamsParams = (new URLSearchParams({
 	streamId: process.env.COLLECTION,
@@ -25,29 +26,30 @@ function filterEntry(entry) {
 }
 
 function filterTitle(entry) {
-	return filterStringTokens(entry.title, blackList).length > 0 &&
-		filterStringTokens(entry.title, whiteList).length === 0
+	const title = entry.title.toLowerCase()
+	return filterStringTokens(title, blackList).length > 0 &&
+		filterStringTokens(title, whiteList).length === 0
 }
 
 function filterContent(entry) {
-	return filterStringTokens(entry.content?.content || entry.summary?.content, blackList).length > 0 &&
-		filterStringTokens(entry.summary.content, whiteList).length === 0
+	const content = (entry.content?.content || entry.summary?.content).toLowerCase()
+	return filterStringTokens(content, blackList).length > 0 &&
+		filterStringTokens(content, whiteList).length === 0
 }
 
 function filterStringTokens(string, checkTokens) {
-	const wordSeparatorRegex = /[\s.,;:!?\-]+/g
-
-	string = string.toLowerCase()
-	const tokens = string.toLowerCase().split(wordSeparatorRegex)
+	const tokens = string.split(wordSeparatorRegex)
 
 	return checkTokens.filter(
-		checkToken => wordSeparatorRegex.test(checkToken)
-		? string.includes(checkToken)
-		: tokens.includes(checkToken)
+		checkToken => (
+			wordSeparatorRegex.test(checkToken)
+			? string.includes(checkToken)
+			: tokens.includes(checkToken)
+		)
 	)
 }
 
-const a = await fetch(
+await fetch(
 	`${baseUrl}/v3/markers`,
 	{
 		method: 'POST',
@@ -63,6 +65,6 @@ const a = await fetch(
 	}
 )
 
-console.log(`${entriesToMarkAsRead.length} entries marked as read`)
-console.log('----------------------------------------------------------------------------------')
 console.log(entriesToMarkAsRead.map(entry => ({title: entry.title, content: entry.content?.content || entry.summary?.content})))
+console.log('----------------------------------------------------------------------------------')
+console.log(`${entriesToMarkAsRead.length} entries marked as read`)
