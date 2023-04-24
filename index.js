@@ -32,7 +32,7 @@ function filterTitle(entry) {
 }
 
 function filterContent(entry) {
-	const content = (entry.content?.content || entry.summary?.content).toLowerCase()
+	const content = (entry.content?.content || entry.summary?.content || '').toLowerCase()
 	return filterStringTokens(content, blackList).length > 0 &&
 		filterStringTokens(content, whiteList).length === 0
 }
