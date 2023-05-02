@@ -4,6 +4,7 @@ import blackestList from './data/blackestList.json' assert {type: 'json'}
 
 const baseUrl = 'https://cloud.feedly.com'
 const wordSeparatorRegex = /[\s.,;:!?\-]+/g
+const processedTitles = []
 
 let continuation = null
 let unreadEntries = []
@@ -38,14 +39,26 @@ while (true) {
 const entriesToMarkAsRead = unreadEntries.filter(filterEntry)
 
 function filterEntry(entry) {
-	return filterTitle(entry) || filterContent(entry)
+	return (
+		filterDuplicate(entry) ||
+		filterTitle(entry) ||
+		filterContent(entry)
+	)
+}
+
+function filterDuplicate(entry) {
+	const isDuplicate = processedTitles.includes(entry.title)
+
+	processedTitles.push(entry.title)
+
+	return isDuplicate
 }
 
 function filterTitle(entry) {
-	const title = entry.title.toLowerCase()
+	const title = entry.title.toLowerCase().trim()
 	return (
-		filterStringTokens(title, blackestList).length > 0 ||
-		(
+		filterStringTokens(title, blackestList).length > 0 || // Title in blackestList
+		( // Title in blackList but not in whiteList
 			filterStringTokens(title, blackList).length > 0 &&
 			filterStringTokens(title, whiteList).length === 0
 		)
@@ -58,8 +71,9 @@ function filterContent(entry) {
 		.toLowerCase()
 
 	return (
-		filterStringTokens(content, blackestList).length > 0 ||
-		(
+		content === '' || // No content
+		filterStringTokens(content, blackestList).length > 0 || // Content in blackestList
+		( // Content in blackList but not in whiteList
 			filterStringTokens(content, blackList).length > 0 &&
 			filterStringTokens(content, whiteList).length === 0
 		)
