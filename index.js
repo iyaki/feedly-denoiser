@@ -3,7 +3,7 @@ import blackList from './data/blackList.json' assert {type: 'json'}
 import blackestList from './data/blackestList.json' assert {type: 'json'}
 
 const baseUrl = 'https://cloud.feedly.com'
-const wordSeparatorRegex = /[\s.,;:!?\-]+/g
+const wordSeparatorRegex = /[\s.",;:¡!¿?\-]+/g
 const processedTitles = []
 
 let continuation = null
@@ -17,7 +17,7 @@ while (true) {
 		unreadOnly: true
 	})).toString()
 
-	const response = await (await fetch(
+	const response = await fetch(
 		`${baseUrl}/v3/streams/contents?${streamsParams}`,
 		{
 			method: 'GET',
@@ -25,14 +25,39 @@ while (true) {
 				Authorization: `Bearer ${process.env.CLIENT_SECRET}`
 			}
 		}
-	)).json()
+	)
 
-	unreadEntries = unreadEntries.concat(response.items)
+	if (response.status === 401) {
+		console.log(`
 
-	if (typeof response.continuation === 'undefined') {
+------------------------------------------------------------------
+|                           IMPORTANTE                           |
+------------------------------------------------------------------
+| Debe actualizarse el toke de Feedly. Dirijase a:               |
+| https://feedly.com/v3/auth/dev                                 |
+|                                                                |
+| Una vez que obtenga el token reemplazelo en el archivo .env    |
+| o en la variable de entorno: CLIENT_SECRET                       |
+------------------------------------------------------------------
+
+`)
 		break
 	}
-	continuation = response.continuation
+
+	const responseData = await response.json()
+
+	if (response.status !== 200) {
+		console.log('Status:', response.status)
+		console.log('Response:', responseData)
+		break;
+	}
+
+	unreadEntries = unreadEntries.concat(responseData.items)
+
+	if (typeof responseData.continuation === 'undefined') {
+		break
+	}
+	continuation = responseData.continuation
 
 }
 
@@ -108,6 +133,6 @@ await fetch(
 	}
 )
 
-console.log(entriesToMarkAsRead.map(entry => entry.title + ' - ' + entry.canonicalUrl))
+console.log(entriesToMarkAsRead.map(entry => `${entry.title} - ${entry.canonicalUrl} `))
 console.log('----------------------------------------------------------------------------------')
 console.log(`${entriesToMarkAsRead.length} entries marked as read`)
