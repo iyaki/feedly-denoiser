@@ -44,7 +44,11 @@ while (true) {
 		break
 	}
 
-	const responseData = await response.json()
+	const responseData = JSON.parse(
+		normalizeString(
+			await response.text()
+		)
+	)
 
 	if (response.status !== 200) {
 		console.log('Status:', response.status)
@@ -59,6 +63,10 @@ while (true) {
 	}
 	continuation = responseData.continuation
 
+}
+
+function normalizeString(string) {
+	return string.normalize('NFD').replace(/\p{Diacritic}/gu, '')
 }
 
 const entriesToMarkAsRead = unreadEntries.filter(filterEntry)
