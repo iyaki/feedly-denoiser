@@ -1,9 +1,13 @@
-import whiteList from './data/whiteList.json' assert {type: 'json'}
-import blackList from './data/blackList.json' assert {type: 'json'}
-import blackestList from './data/blackestList.json' assert {type: 'json'}
+import fs from 'fs'
+
+const args = process.argv.slice(2);
+
+const blackList = JSON.parse(fs.readFileSync(args[0], { encoding: 'utf8' }))
+const whiteList = JSON.parse(fs.readFileSync(args[1], { encoding: 'utf8' }))
+const blackestList = JSON.parse(fs.readFileSync(args[2], { encoding: 'utf8' }))
 
 const baseUrl = 'https://cloud.feedly.com'
-const wordSeparatorRegex = /[\s\t\r\n"'‘’“”`\^\~_\.,;\:¡!¿?+\-\/*=\\\(\)\[\]{}|@#$%&<>]+/g
+const wordSeparatorRegex = /[\s"'‘’“”`\^\~_\.,;\:¡!¿?+\-\/*=\\\(\)\[\]{}|@#$%&<>]+/
 const processedTitles = []
 
 let continuation = null
@@ -90,13 +94,11 @@ function filterDuplicate(entry) {
 function filterTitle(entry) {
 	const title = entry.title.toLowerCase().trim()
 
-	console.log(title, filterStringTokens(title, blackestList))
-
 	return (
-		filterStringTokens(title, blackestList).length > 0 || // Title in blackestList
+		hasMatchingTokens(title, blackestList) || // Title in blackestList
 		( // Title in blackList but not in whiteList
-			filterStringTokens(title, blackList).length > 0 &&
-			filterStringTokens(title, whiteList).length === 0
+			!hasMatchingTokens(title, whiteList) &&
+			hasMatchingTokens(title, blackList)
 		)
 	)
 }
@@ -108,27 +110,30 @@ function filterContent(entry) {
 
 	return (
 		content === '' || // No content
-		filterStringTokens(content, blackestList).length > 0 || // Content in blackestList
+		hasMatchingTokens(content, blackestList) || // Content in blackestList
 		( // Content in blackList but not in whiteList
-			filterStringTokens(content, blackList).length > 0 &&
-			filterStringTokens(content, whiteList).length === 0
+			!hasMatchingTokens(content, whiteList) &&
+			hasMatchingTokens(content, blackList)
 		)
 	)
 }
 
-function filterStringTokens(string, checkTokens) {
+function hasMatchingTokens(string, checkTokens) {
 	const tokens = string.split(wordSeparatorRegex)
 
-	let result = []
 	for (const checkToken of checkTokens) {
 		if (wordSeparatorRegex.test(checkToken)) {
-			result.push(string.includes(checkToken))
+			if (string.includes(checkToken)) {
+				return true;
+			}
 		} else {
-			result.push(tokens.includes(checkToken))
+			if (tokens.includes(checkToken)) {
+				return true;
+			}
 		}
 	}
 
-	return result
+	return false
 }
 
 await fetch(
