@@ -152,6 +152,9 @@ await fetch(
 	}
 )
 
-console.log(entriesToMarkAsRead.map(entry => `${entry.title} - ${entry.canonicalUrl} `))
+console.log(
+	'Entries filtered:',
+	entriesToMarkAsRead.map(entry => `${entry.title} - ${entry.canonicalUrl} `)
+)
 console.log('----------------------------------------------------------------------------------')
 console.log(`${entriesToMarkAsRead.length} entries marked as read`)
