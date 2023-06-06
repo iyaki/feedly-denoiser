@@ -35,7 +35,7 @@ npm install --save-exact
 
 #### Dependencias
 
-Para funcionar, feedly-denoise requiere [Node.js[(https://nodejs.org/es)] y
+Para funcionar, feedly-denoiser requiere [Node.js[(https://nodejs.org/es)] y
 [npm](https://nodejs.org/es/docs/meta/topics/dependencies#npm).
 
 Personalmente, recomiendo instalar Node.js utilizando algún gestor de versiones
@@ -70,3 +70,12 @@ curl --request GET \
 ```shell
 ./denoise.sh path_to_blacklist.json path_to_whitelist.json path_to_blackestlist.json
 ```
+
+#### Automatización
+
+Es posible automatizar la ejecución de feedly-denoiser mediante distintas
+técnicas.
+
+En el repositorio [feedly-denoiser-automation](https://github.com/iyaki/feedly-denoiser-automation)
+puede encontrarse un ejemplo de automatización utilizando
+[Github Actions](https://github.com/features/actions).
