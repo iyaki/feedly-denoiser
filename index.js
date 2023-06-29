@@ -45,7 +45,7 @@ while (true) {
 ------------------------------------------------------------------
 
 `)
-		break
+		throw 'Invalid Token'
 	}
 
 	const responseData = JSON.parse(
