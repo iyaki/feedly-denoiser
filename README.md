@@ -1,3 +1,9 @@
+⛔️ OBSOLETO - Este proyecto no cuenta con mantenimiento activo.
+
+Desde Octubre del 2023 Feedly requiere de una suscripción de pago para entregar
+Developer Access Tokens por lo que ya no usaré esta herramienta ni le brindaré
+mantenimiento.
+
 # Feedly Denoiser
 
 Filtrado de artículos en [Feedly](https://feedly.com/) (recopilador de noticias
